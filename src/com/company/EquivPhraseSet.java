@@ -32,10 +32,13 @@ public class EquivPhraseSet {
     }
 
     public boolean equals(EquivPhraseSet e2){
+        if(e2.phrases.size() != this.phrases.size() || e2.apis.size() != this.apis.size())
+            return false;
         for(Phrase p1 : this.phrases){
             if(!e2.phrases.contains(p1))
                 return false;
         }
+        // TODO use the one with the most keys as the outer loop
         for(Map.Entry<String, Integer> api : apis.entrySet()){
             if(!e2.apis.get(api.getKey()).equals(api.getValue()))
                 return false;

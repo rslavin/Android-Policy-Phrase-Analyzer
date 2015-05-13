@@ -33,7 +33,7 @@ public class Driver {
         try {
             APIMapper mapper = new APIMapper(phrases, policyFiles, apiLogs, VERBOSE);
             mapper.apiPhraseFrequency(VERBOSE);
-          //  mapper.equivalenceFinder(10, 3);
+            mapper.equivalenceFinder(10, 3);
         } catch (IOException e) {
             e.printStackTrace();
         }

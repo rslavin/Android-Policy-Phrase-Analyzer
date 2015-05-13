@@ -99,8 +99,11 @@ public class APIMapper {
                             for (Map.Entry<String, Integer> api2 : phrase2.apis.entrySet()) {
                                 // if the two apis are equal and called enough times
                                 if (api2.getValue() > minAPICalls &&
-                                        api2.getKey().equals(api.getKey()))
+                                        api2.getKey().equals(api.getKey())){
+                                    // CHECK ALL OTHER PHRASES FOR SAME MATCH
+                                    // USE A MAP with phrase=>api
                                     matchingApis.add(api.getKey());
+                                }
                             }
                         }
                     }
@@ -118,7 +121,7 @@ public class APIMapper {
             }
         }
 
-  /*      // remove duplicates from set
+   /*     // remove duplicates from set
         for(EquivPhraseSet equivPhrases : equivsSet){
             for(EquivPhraseSet equivPhrases2 : equivsSet){
                 if(equivPhrases != equivPhrases2)
@@ -126,12 +129,15 @@ public class APIMapper {
                         equivsSet.remove(equivPhrases2);
             }
         }
-
-        List<EquivPhraseSet> equivsSetUnique = new ArrayList<>();
+*/
         for(int i = 0; i < equivsSet.size(); i++){
             for(int j = (i + 1); j < equivsSet.size(); j++)
+                if(!equivsSet.get(i).equals(equivsSet.get(j))) {
+                    equivsSet.remove(equivsSet.get(j));
+                }
+
         }
-*/
+
         // print
         for(EquivPhraseSet equivPhrases : equivsSet){
             System.out.println(equivPhrases);
