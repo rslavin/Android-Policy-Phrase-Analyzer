@@ -1,0 +1,170 @@
+anonymized information
+ip address
+location
+operating system type
+asanonymous user usage data
+browser type
+contacts
+country
+device type
+internet protocol
+ip addresses
+name
+technological information
+telephone number
+web request
+crash reports
+dump reports
+location information
+mcc
+statistics
+usage
+usages statistics
+version
+ip address
+device identifiers
+log files
+sms messages
+advertising identifier
+geo-location information
+browser language
+browser type
+crashes
+device-specific information
+event information
+gps
+hardware settings
+information
+ip address
+search queries
+sensors
+system activity
+location
+applications
+coarse location
+data
+device id
+hardware
+in-game information
+information
+ip address
+mac
+non-personal data
+software
+aggregated data
+aggregated user data
+cookies
+demographic patterns
+device's udid
+devices
+ip addresses
+mobile device
+mobile device identifiers
+session data
+tablet
+web browser software information
+browser type
+clicks
+contacts
+country
+device type
+geo-location
+ip address
+mac address
+mobile device identifiers
+operating system
+page views
+posted reviews
+searches
+taps
+telephone number
+analytics information
+device
+device identifier
+device identifiers
+internet protocol
+location data
+log file information
+log files
+web pages
+web request
+access times
+browser information
+device identifiers
+geo-location information
+ip address
+log information
+mac address
+scores
+access devices
+browser language
+browser types
+chat text
+cookies
+country
+device identifiers
+device type
+device's mac address
+domain names
+geo-location
+ip addresses
+landing pages
+mac address
+mobile device identifiers
+physical location
+platform type
+possibly ip address
+similar information
+technical information
+telephone number
+urls
+voice communications
+general geographic location
+phone number
+device's internet protocol
+ip address
+real-time location-based information
+software
+bandwidth
+browser type
+carrier network
+contacts
+device capability
+device model number
+manufacturer's name
+operating system
+platform
+browser type
+device type
+file requested
+information
+internet protocol
+internet service provider
+ip address
+log files
+mac address
+unique identifier
+unique identifiers
+domain servers
+ip addresses
+location information
+operating system information
+telecommunications carrier information
+unique device identifiers
+browser type
+geographic data
+high-level geographic information
+ip address
+location information
+operating system
+spotify application version
+technical data
+third party applications
+transactional information enabling digital rights management
+unique device id
+device identifier
+internet protocol address
+location
+mobile device model
+unique browser
+contacts

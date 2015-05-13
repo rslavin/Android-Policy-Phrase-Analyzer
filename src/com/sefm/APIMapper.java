@@ -1,4 +1,4 @@
-package com.company;
+package com.sefm;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,23 +17,25 @@ public class APIMapper {
     public boolean verbose;
     public int countNoPhrases = 0;
     public int countNoAPIs = 0;
+    public ArrayList<ArrayList<String>> synonyms;
 
-    public APIMapper(ArrayList<String> phrases, String policyDirectoryPath, String apiLogDirectoryPath, boolean verbose) throws IOException {
+    public APIMapper(ArrayList<String> phrases, String policyDirectoryPath, String apiLogDirectoryPath, boolean verbose, ArrayList<ArrayList<String>> synonyms) throws IOException {
         this.verbose = verbose;
-        policies = new ArrayList<Policy>();
+        this.synonyms = synonyms;
+        policies = new ArrayList<>();
         // Look through each policy and find matching phrases
         File policyDirectory = new File(policyDirectoryPath);
         for(File fileEntry : policyDirectory.listFiles()) {
-            Policy newPolicy = new Policy(fileEntry.getName());
+            Policy newPolicy = new Policy(fileEntry.getName(), this);
             BufferedReader br = new BufferedReader(new FileReader(fileEntry));
             String line;
             // for each line, check if it contains a phrase from the list
             while ((line = br.readLine()) != null)
                 for (String phrase : phrases) {
-                    if (line.contains(phrase)) {
+                    if (line.toLowerCase().contains(phrase.toLowerCase())) {
                         if(verbose)
                             System.out.println("Matched phrase '" + phrase + "' to policy '" + fileEntry.getName());
-                        newPolicy.addPhrase(phrase);
+                        newPolicy.addPhrase(synonymFixer(phrase));
                     }
                 }
             // if phrases found, look for apis
@@ -50,6 +52,20 @@ public class APIMapper {
                 policies.add(newPolicy);
         }
 
+    }
+
+    /**
+     * If a "master" synonym exists for a phrase, it is replaced with the "master".
+     * @param phrase Phrase to check for a "master" synonym.
+     * @return
+     */
+    private String synonymFixer(String phrase){
+        for(List<String> synList : synonyms){
+            if(synList.contains(phrase)) {
+                return synList.get(0);
+            }
+        }
+        return phrase;
     }
 
     /**
@@ -145,6 +161,13 @@ public class APIMapper {
         System.out.println("Total Equivalent Sets: " + equivsSet.size());
     }
 
+    /**
+     * Associates APIs to a policy by reading in FlowDroid data from existing files.
+     * @param policy
+     * @param apiLogDirectoryPath
+     * @return
+     * @throws IOException
+     */
     private ArrayList<String> getAPIs(Policy policy, String apiLogDirectoryPath) throws IOException {
         File apiLog = new File(apiLogDirectoryPath + "/" + policy.name.replace(".html", ".apk.log"));
         BufferedReader br = new BufferedReader(new FileReader(apiLog));
@@ -156,6 +179,10 @@ public class APIMapper {
         return apis;
     }
 
+    /**
+     * Creates Phrase objects for every Phrase in a Policy. The resulting
+     * Phrases are mapped to all APIs from the Policy.
+     */
     private void phraseMapper(){
         phrases = new ArrayList<>();
         for(Policy policy : policies){
@@ -182,5 +209,18 @@ public class APIMapper {
         }
         // add a new Phrase otherwise.
         phrases.add(newPhrase);
+    }
+
+    /**
+     * Calculates the inverse document frequency of an API given all Phrases
+     * in all Policies.
+     * @param api
+     * @return
+     */
+    public double apiIDF(String api){
+        List<List<String>> phrasesSet = new ArrayList<>();
+        for(Policy policy : policies)
+            phrasesSet.add(policy.apis);
+        return Calc.idf(phrasesSet, api);
     }
 }

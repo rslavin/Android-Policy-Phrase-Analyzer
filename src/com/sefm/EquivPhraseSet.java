@@ -1,4 +1,4 @@
-package com.company;
+package com.sefm;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,6 +39,7 @@ public class EquivPhraseSet {
                 return false;
         }
         // TODO use the one with the most keys as the outer loop
+        // TODO getting a null pointer in the map iteration
         for(Map.Entry<String, Integer> api : apis.entrySet()){
             if(!e2.apis.get(api.getKey()).equals(api.getValue()))
                 return false;

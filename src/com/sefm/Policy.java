@@ -1,4 +1,4 @@
-package com.company;
+package com.sefm;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,8 +12,10 @@ public class Policy {
     public String name;
     public List<String> apis;
     public HashMap<String, Integer> phrases;
+    private APIMapper apiMapper;
 
-    public Policy(String name){
+    public Policy(String name, APIMapper apiMapper){
+        this.apiMapper = apiMapper;
         this.name = name;
         phrases = new HashMap<String, Integer>();
         apis = new ArrayList<String>();
@@ -45,7 +47,7 @@ public class Policy {
     public ArrayList<Phrase> toPhrases(){
         ArrayList<Phrase> phraseObjects = new ArrayList<Phrase>();
         for(Map.Entry<String, Integer> phrase : phrases.entrySet()){
-            Phrase newPhraseObj = new Phrase(phrase.getKey());
+            Phrase newPhraseObj = new Phrase(phrase.getKey(), apiMapper);
             newPhraseObj.occurrences = phrase.getValue();
             HashMap<String, Integer> phraseAPIs = new HashMap<String, Integer>();
             for(String api : apis){
@@ -56,6 +58,19 @@ public class Policy {
             phraseObjects.add(newPhraseObj);
         }
         return phraseObjects;
+    }
+
+    /**
+     * Returns an ArrayList of phrases with each phrase appearing the number of times
+     * as its frequency.
+     * @return
+     */
+    public ArrayList<String> getPhrasesAsListWithFreq(){
+        ArrayList<String> keys = new ArrayList<>();
+        for(Map.Entry<String, Integer> phrase : phrases.entrySet())
+            for(int i = 0; i < phrase.getValue(); i++)
+                keys.add(phrase.getKey());
+        return keys;
     }
 
     public String toString(){
