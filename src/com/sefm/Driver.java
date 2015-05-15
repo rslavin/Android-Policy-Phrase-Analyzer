@@ -9,7 +9,6 @@ import java.util.Arrays;
 
 public class Driver {
 
-
     private static final boolean VERBOSE = false;
     private static String apiLogs = "C:\\Users\\Rocky\\Dropbox\\Research\\android privacy\\androidPolicyDownloader\\API Calls\\outAPI";
     private static String policyFiles = "C:\\Users\\Rocky\\Dropbox\\Research\\android privacy\\50 policies";
