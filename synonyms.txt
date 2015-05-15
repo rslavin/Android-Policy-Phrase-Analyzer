@@ -1,6 +1,6 @@
 IP address, ip address, internet protocol, ip addresses, possibly ip address, device's internet protocol, internet protocol address
-country, geo-location information, geo-location, general geographic location
-mcc, geographic data, high-level geographic information
+geo-location information, geo-location, general geographic location
+geographic data, high-level geographic information
 location, coarse location, location data, physical location
 device identifier, device identifiers, mobile device identifiers, device identifiers, device id, device's udid, unique device identifiers, unique device id
 mac address, mac, mac, device's mac address

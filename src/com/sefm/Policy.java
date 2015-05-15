@@ -17,20 +17,20 @@ public class Policy {
     public Policy(String name, APIMapper apiMapper){
         this.apiMapper = apiMapper;
         this.name = name;
-        phrases = new HashMap<String, Integer>();
-        apis = new ArrayList<String>();
+        phrases = new HashMap<>();
+        apis = new ArrayList<>();
     }
 
     /**
      * Adds a phrase to the policy. Keeps track of occurrences of a phrase.
      * @param phrase
      */
-    public void addPhrase(String phrase){
+    public void addPhrase(String phrase, int count){
         if (phrases.containsKey(phrase)) {
             int oldVal = phrases.get(phrase);
-            phrases.put(phrase, oldVal + 1);
+            phrases.put(phrase, oldVal + count);
         }else{
-            phrases.put(phrase, 1);
+            phrases.put(phrase, count);
         }
     }
 
