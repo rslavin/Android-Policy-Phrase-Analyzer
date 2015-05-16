@@ -1,22 +1,25 @@
 package com.sefm;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Driver {
 
     private static final boolean VERBOSE = false;
-    private static String apiLogs = "C:\\Users\\Rocky\\Dropbox\\Research\\android privacy\\androidPolicyDownloader\\API Calls\\outAPI";
-    private static String policyFiles = "C:\\Users\\Rocky\\Dropbox\\Research\\android privacy\\50 policies";
+    private static String apiLogs = "C:\\Users\\Rocky\\Dropbox\\Research\\android privacy\\analysis\\1000policiesAPIS";
+    private static String policyFiles = "C:\\Users\\Rocky\\Dropbox\\Research\\android privacy\\analysis\\1000policies";
     private static String phraseFile = "phrases.txt";
     private static String synonymFile = "synonyms.txt";
+    private static String outFile = "out.txt";
 
     public static void main(String args[]) {
         ArrayList<String> phrases;
+        try {
+            System.setOut(new PrintStream(new File(outFile)));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
         try {
             phrases = getPhrases(phraseFile);

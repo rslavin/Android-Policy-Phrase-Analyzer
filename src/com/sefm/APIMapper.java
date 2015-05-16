@@ -89,6 +89,7 @@ public class APIMapper {
         for (Phrase phrase : this.phrases) {
             System.out.println(phrase.toString(sortByFrequency));
         }
+        System.out.println("Total Policies: " + policies.size());
     }
 
     /**
@@ -179,7 +180,7 @@ public class APIMapper {
      * @throws IOException
      */
     private ArrayList<String> getAPIs(Policy policy, String apiLogDirectoryPath) throws IOException {
-        File apiLog = new File(apiLogDirectoryPath + "/" + policy.name.replace(".html", ".apk.log"));
+        File apiLog = new File(apiLogDirectoryPath + "/" + policy.name.replaceAll("\\.html$", ".apk.log"));
         BufferedReader br = new BufferedReader(new FileReader(apiLog));
         String line;
         ArrayList<String> apis = new ArrayList<String>();
