@@ -231,9 +231,9 @@ public class APIMapper {
      * @return
      */
     public double apiIDF(String api) {
-        List<List<String>> phrasesSet = new ArrayList<>();
+        List<List<String>> phraseAPIs = new ArrayList<>();
         for (Policy policy : policies)
-            phrasesSet.add(policy.apis);
-        return Calc.idf(phrasesSet, api);
+            phraseAPIs.add(policy.apis);
+        return Calc.idf(phraseAPIs, api);
     }
 }
