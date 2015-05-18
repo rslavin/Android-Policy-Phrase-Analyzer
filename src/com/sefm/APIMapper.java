@@ -15,6 +15,7 @@ import java.util.Map;
 public class APIMapper {
     public List<Policy> policies;
     public List<Phrase> phrases;
+    public List<APIMapping> apiMappings;
     public boolean verbose;
     public int countNoPhrases = 0;
     public int countNoAPIs = 0;
@@ -25,6 +26,7 @@ public class APIMapper {
         this.verbose = verbose;
         this.synonyms = synonyms;
         policies = new ArrayList<>();
+        apiMappings = new ArrayList<>();
         // Look through each policy and find matching phrases
         File policyDirectory = new File(policyDirectoryPath);
         for (File fileEntry : policyDirectory.listFiles()) {
@@ -185,7 +187,8 @@ public class APIMapper {
         String line;
         ArrayList<String> apis = new ArrayList<String>();
         while ((line = br.readLine()) != null) {
-            apis.add(line.substring(0, line.length() - 4));
+            apis.add(APIMapping.getApiFromFlowDroid(line));
+//            apis.add(line.substring(0, line.length() - 4));
         }
         return apis;
     }
@@ -235,5 +238,40 @@ public class APIMapper {
         for (Policy policy : policies)
             phrasesSet.add(policy.apis);
         return Calc.idf(phrasesSet, api);
+    }
+
+    /**
+     * Map phrases to each api.
+     */
+    public void apiMap() {
+        if (policies.size() == 0) {
+            System.err.println("No policies parsed yet. Run apiPhraseFrequency() first.");
+            return;
+        }
+
+        for (Policy policy : policies) {
+            for (String api : policy.apis)
+                addAPIMapping(api, policy);
+        }
+
+        for (APIMapping mapping : apiMappings) {
+            System.out.println("\n" + mapping);
+        }
+
+    }
+
+    /**
+     * Adds an api occurrence to apiMappings
+     *
+     * @param api
+     */
+    private void addAPIMapping(String api, Policy policy) {
+        for (APIMapping existingApi : apiMappings) {
+            if (existingApi.api.equals(api)) {
+                existingApi.addPolicy(policy);
+                return;
+            }
+        }
+        apiMappings.add(new APIMapping(api, policy));
     }
 }
