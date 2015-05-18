@@ -83,4 +83,23 @@ public class APIMapping {
             phrases.put(phrase, count);
         }
     }
+
+    /**
+     * Creates list of rows for use with CSVWriter. Formatted as
+     * api, category, phrase, phrase frequency
+     *
+     * @return
+     */
+    public ArrayList<ArrayList<String>> toCSVFormat() {
+        ArrayList<ArrayList<String>> rows = new ArrayList<>();
+        for (Map.Entry<String, Integer> phrase : phrases.entrySet()) {
+            ArrayList<String> row = new ArrayList<>();
+            row.add(api);
+            row.add(getSuSiCategory(api));
+            row.add(phrase.getKey());
+            row.add("" + phrase.getValue());
+            rows.add(row);
+        }
+        return rows;
+    }
 }

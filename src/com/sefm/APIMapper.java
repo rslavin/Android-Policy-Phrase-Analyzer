@@ -185,10 +185,9 @@ public class APIMapper {
         File apiLog = new File(apiLogDirectoryPath + "/" + policy.name.replaceAll("\\.html$", ".apk.log"));
         BufferedReader br = new BufferedReader(new FileReader(apiLog));
         String line;
-        ArrayList<String> apis = new ArrayList<String>();
+        ArrayList<String> apis = new ArrayList<>();
         while ((line = br.readLine()) != null) {
             apis.add(APIMapping.getApiFromFlowDroid(line));
-//            apis.add(line.substring(0, line.length() - 4));
         }
         return apis;
     }
@@ -244,6 +243,7 @@ public class APIMapper {
      * Map phrases to each api.
      */
     public void apiMap() {
+        // TODO add exception
         if (policies.size() == 0) {
             System.err.println("No policies parsed yet. Run apiPhraseFrequency() first.");
             return;
@@ -273,5 +273,54 @@ public class APIMapper {
             }
         }
         apiMappings.add(new APIMapping(api, policy));
+    }
+
+    public void apiMappingsToCSV(String filename) throws IOException {
+        // TODO add exception
+        if (policies.size() == 0) {
+            System.err.println("No phrases mapped yet. Run apiMap() first.");
+            return;
+        }
+
+
+        CSVWriter csv = new CSVWriter(filename);
+        ArrayList<String> headers = new ArrayList<>();
+        headers.add("API");
+        headers.add("Category");
+        headers.add("Phrase");
+        headers.add("Frequency");
+        csv.addRow(headers);
+        for (APIMapping mapping : apiMappings) {
+            List<ArrayList<String>> rows = mapping.toCSVFormat();
+            for (ArrayList<String> row : rows)
+                csv.addRow(row);
+        }
+        csv.writeFile();
+    }
+
+    public void phraseMappingsToCSV(String filename) throws IOException {
+        // TODO add exception
+        CSVWriter csv = new CSVWriter(filename);
+        ArrayList<String> headers = new ArrayList<>();
+        headers.add("Phrase");
+        headers.add("API");
+        headers.add("Frequency");
+        headers.add("TF");
+        headers.add("IDF");
+        headers.add("TF*IDF");
+        csv.addRow(headers);
+        for (Phrase phrase : phrases) {
+            for (Map.Entry<String, Integer> api : phrase.apis.entrySet()) {
+                ArrayList<String> row = new ArrayList<>();
+                row.add(phrase.name);
+                row.add(api.getKey());
+                row.add("" + api.getValue());
+                row.add("" + phrase.apiTF(api.getKey()));
+                row.add("" + apiIDF(api.getKey()));
+                row.add("" + (phrase.apiTF(api.getKey()) * apiIDF(api.getKey())));
+                csv.addRow(row);
+            }
+        }
+        csv.writeFile();
     }
 }

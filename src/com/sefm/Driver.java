@@ -32,6 +32,8 @@ public class Driver {
             APIMapper mapper = new APIMapper(phrases, policyFiles, apiLogs, VERBOSE, parseSynonyms());
             mapper.apiPhraseFrequency(VERBOSE);
             mapper.apiMap();
+            mapper.apiMappingsToCSV("phraseToApis");
+            mapper.phraseMappingsToCSV("apiToPhrases");
             //     mapper.equivalenceFinder(10, 3);
         } catch (IOException e) {
             e.printStackTrace();
