@@ -34,6 +34,7 @@ public class Driver {
             mapper.apiMap();
             mapper.apiMappingsToCSV("phraseToApis");
             mapper.phraseMappingsToCSV("apiToPhrases");
+            System.out.println("\n" + mapper.getStats());
             //     mapper.equivalenceFinder(10, 3);
         } catch (IOException e) {
             e.printStackTrace();

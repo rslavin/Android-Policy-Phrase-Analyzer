@@ -16,8 +16,9 @@ public class APIMapper {
     public List<Policy> policies;
     public List<Phrase> phrases;
     public List<APIMapping> apiMappings;
+    public List<Policy> noPhrasePolicies;
+    public List<Policy> noApiPolicies;
     public boolean verbose;
-    public int countNoPhrases = 0;
     public int countNoAPIs = 0;
     public ArrayList<ArrayList<String>> synonyms;
     public boolean sortByFrequency = false;
@@ -27,6 +28,8 @@ public class APIMapper {
         this.synonyms = synonyms;
         policies = new ArrayList<>();
         apiMappings = new ArrayList<>();
+        noPhrasePolicies = new ArrayList<>();
+        noApiPolicies = new ArrayList<>();
         // Look through each policy and find matching phrases
         File policyDirectory = new File(policyDirectoryPath);
         for (File fileEntry : policyDirectory.listFiles()) {
@@ -35,17 +38,13 @@ public class APIMapper {
             HTMLParser html = new HTMLParser(fileContents);
             fileContents = html.removeHTMLTags();
 
-            // BufferedReader br = new BufferedReader(new FileReader(fileEntry));
             // for each line, check if it contains a phrase from the list
             for (String phrase : phrases) {
                 int count;
                 if ((count = HTMLParser.countOccurrences(fileContents.toLowerCase(), phrase.toLowerCase())) > 0) {
                     if (verbose)
                         System.out.println("Matched phrase '" + phrase + "' to policy '" + fileEntry.getName());
-//                    if (fileEntry.getName().equals("my.googlemusic.play.html")) {
-//                        System.out.println(fileContents);
-//                        System.out.println("\n\nPhrase: " + phrase + " - " + count);
-//                    }
+
                     newPolicy.addPhrase(synonymFixer(phrase), count);
                 }
             }
@@ -53,9 +52,9 @@ public class APIMapper {
             if (newPolicy.phrases.size() > 0)
                 newPolicy.apis = getAPIs(newPolicy, apiLogDirectoryPath);
             else
-                countNoPhrases++;
+                noPhrasePolicies.add(newPolicy);
             if (newPolicy.apis.size() == 0)
-                countNoAPIs++;
+                noApiPolicies.add(newPolicy);
             if (verbose)
                 System.out.println("==== New Policy ====\n" + newPolicy);
 
@@ -63,6 +62,14 @@ public class APIMapper {
                 policies.add(newPolicy);
         }
 
+    }
+
+    public String getStats() {
+        String ret = "Policies: " + policies.size() +
+                "Policies (no phrases): " + noPhrasePolicies.size() +
+                "Policies (no apis): " + noApiPolicies.size() +
+                "Phrases: " + phrases.size();
+        return ret;
     }
 
     /**
