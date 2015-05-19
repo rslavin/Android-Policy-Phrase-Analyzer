@@ -2,7 +2,6 @@ package com.sefm;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -10,7 +9,7 @@ import java.util.Map;
  */
 public class Policy {
     public String name;
-    public List<String> apis;
+    public ArrayList<String> apis;
     public HashMap<String, Integer> phrases;
     private APIMapper apiMapper;
 

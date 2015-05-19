@@ -56,6 +56,30 @@ public class APIMapping {
         return api;
     }
 
+    /**
+     * Returns an ArrayList of apis for each phrase appearing as many times
+     * as its frequency.
+     *
+     * @return
+     */
+    public ArrayList<String> getPhrasesAsListWithFreq() {
+        ArrayList<String> keys = new ArrayList<>();
+        for (Map.Entry<String, Integer> phrase : phrases.entrySet())
+            for (int i = 0; i < phrase.getValue(); i++)
+                keys.add(phrase.getKey());
+        return keys;
+    }
+
+    /**
+     * Calculates the term frequency of a phrase for the API.
+     *
+     * @param phrase
+     * @return
+     */
+    public double phraseTF(String phrase) {
+        return Calc.tf(this.getPhrasesAsListWithFreq(), phrase);
+    }
+
     public String toString() {
         String ret = "API: " + getSimpleApi(api);
         ret += "\nApps present in: " + policies.size();

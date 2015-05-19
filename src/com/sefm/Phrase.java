@@ -15,7 +15,7 @@ public class Phrase {
     public Phrase(String name, APIMapper apiMapper) {
         this.apiMapper = apiMapper;
         this.name = name;
-        apis = new HashMap<String, Integer>();
+        apis = new HashMap<>();
         policies = new HashSet<>();
     }
 

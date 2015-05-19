@@ -240,10 +240,17 @@ public class APIMapper {
      * @return
      */
     public double apiIDF(String api) {
-        List<List<String>> phraseAPIs = new ArrayList<>();
+        ArrayList<ArrayList<String>> phraseAPIs = new ArrayList<>();
         for (Policy policy : policies)
             phraseAPIs.add(policy.apis);
         return Calc.idf(phraseAPIs, api);
+    }
+
+    public double phraseIDF(String phrase) {
+        ArrayList<ArrayList<String>> apiPhrases = new ArrayList<>();
+        for (APIMapping apiMap : apiMappings)
+            apiPhrases.add(apiMap.getPhrasesAsListWithFreq());
+        return Calc.idf(apiPhrases, phrase);
     }
 
     /**
@@ -296,11 +303,22 @@ public class APIMapper {
         headers.add("Category");
         headers.add("Phrase");
         headers.add("Frequency");
+        headers.add("TF");
+        headers.add("IDF");
+        headers.add("TF*IDF");
         csv.addRow(headers);
         for (APIMapping mapping : apiMappings) {
-            List<ArrayList<String>> rows = mapping.toCSVFormat();
-            for (ArrayList<String> row : rows)
+            for (Map.Entry<String, Integer> phrase : mapping.phrases.entrySet()) {
+                ArrayList<String> row = new ArrayList<>();
+                row.add(mapping.api);
+                row.add(APIMapping.getSuSiCategory(mapping.api));
+                row.add(phrase.getKey());
+                row.add("" + phrase.getValue());
+                row.add("" + mapping.phraseTF(phrase.getKey()));
+                row.add("" + phraseIDF(phrase.getKey()));
+                row.add("" + (mapping.phraseTF(phrase.getKey()) * phraseIDF(phrase.getKey())));
                 csv.addRow(row);
+            }
         }
         csv.writeFile();
     }

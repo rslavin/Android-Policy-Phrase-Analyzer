@@ -1,5 +1,6 @@
 package com.sefm;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,7 +29,7 @@ public class Calc {
      * @param term Term to calculate idf for.
      * @return IDF
      */
-    public static double idf(List<List<String>> docsTerms, String term){
+    public static double idf(ArrayList<ArrayList<String>> docsTerms, String term) {
         double count = 0;
         for(List<String> doc : docsTerms){
             for(String t : doc){
