@@ -9,7 +9,8 @@ import java.util.Map;
  */
 public class Policy {
     public String name;
-    public ArrayList<String> apis;
+    //    public ArrayList<String> apis;
+    public Map<String, Integer> apis;
     public HashMap<String, Integer> phrases;
     private APIMapper apiMapper;
 
@@ -17,7 +18,7 @@ public class Policy {
         this.apiMapper = apiMapper;
         this.name = name;
         phrases = new HashMap<>();
-        apis = new ArrayList<>();
+        apis = new HashMap<>();
     }
 
     /**
@@ -49,9 +50,9 @@ public class Policy {
             Phrase newPhraseObj = new Phrase(phrase.getKey(), apiMapper);
             newPhraseObj.occurrences = phrase.getValue();
             HashMap<String, Integer> phraseAPIs = new HashMap<String, Integer>();
-            for(String api : apis){
-                phraseAPIs.put(api, 1);
-            }
+//            for(String api : apis){
+            for (Map.Entry<String, Integer> api : apis.entrySet())
+                phraseAPIs.put(api.getKey(), api.getValue());
             newPhraseObj.apis = new HashMap<>(phraseAPIs);
             newPhraseObj.policies.add(this);
             phraseObjects.add(newPhraseObj);
@@ -72,12 +73,21 @@ public class Policy {
         return keys;
     }
 
+    public ArrayList<String> getAPIsAsListWithFreq() {
+        ArrayList<String> keys = new ArrayList<>();
+        for (Map.Entry<String, Integer> api : apis.entrySet())
+            for (int i = 0; i < api.getValue(); i++)
+                keys.add(api.getKey());
+        return keys;
+    }
+
     public String toString(){
         String ret = "Name: " + this.name;
         for(Map.Entry<String, Integer> phrase : phrases.entrySet())
             ret += "\nPhrase: " + phrase.getKey() + " (" + phrase.getValue() + ")";
-        for(String api : apis)
-            ret+= "\nAPI: " + api;
+//        for(String api : apis)
+        for (Map.Entry<String, Integer> api : apis.entrySet())
+            ret += "\nAPI: " + api.getKey() + " (" + api.getValue() + ")";
         return ret;
     }
 }

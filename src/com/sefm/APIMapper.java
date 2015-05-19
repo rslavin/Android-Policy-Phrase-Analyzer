@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -65,10 +66,10 @@ public class APIMapper {
     }
 
     public String getStats() {
-        String ret = "Policies: " + policies.size() +
-                "Policies (no phrases): " + noPhrasePolicies.size() +
-                "Policies (no apis): " + noApiPolicies.size() +
-                "Phrases: " + phrases.size();
+        String ret = "Policies analyzed: " + policies.size() +
+                "\nPolicies without phrases: " + noPhrasePolicies.size() +
+                "\nPolicies without apis: " + noApiPolicies.size() +
+                "\nPhrases: " + phrases.size();
         return ret;
     }
 
@@ -188,13 +189,14 @@ public class APIMapper {
      * @return
      * @throws IOException
      */
-    private ArrayList<String> getAPIs(Policy policy, String apiLogDirectoryPath) throws IOException {
+    private HashMap<String, Integer> getAPIs(Policy policy, String apiLogDirectoryPath) throws IOException {
         File apiLog = new File(apiLogDirectoryPath + "/" + policy.name.replaceAll("\\.html$", ".apk.log"));
         BufferedReader br = new BufferedReader(new FileReader(apiLog));
         String line;
-        ArrayList<String> apis = new ArrayList<>();
+//        ArrayList<String> apis = new ArrayList<>();
+        HashMap<String, Integer> apis = new HashMap<>();
         while ((line = br.readLine()) != null) {
-            apis.add(APIMapping.getApiFromFlowDroid(line));
+            apis.put(APIMapping.getApiFromFlowDroid(line), APIMapping.getApiFreqFromFlowDroid(line));
         }
         return apis;
     }
@@ -242,7 +244,7 @@ public class APIMapper {
     public double apiIDF(String api) {
         ArrayList<ArrayList<String>> phraseAPIs = new ArrayList<>();
         for (Policy policy : policies)
-            phraseAPIs.add(policy.apis);
+            phraseAPIs.add(policy.getAPIsAsListWithFreq());
         return Calc.idf(phraseAPIs, api);
     }
 
@@ -264,8 +266,9 @@ public class APIMapper {
         }
 
         for (Policy policy : policies) {
-            for (String api : policy.apis)
-                addAPIMapping(api, policy);
+//            for (String api : policy.apis)
+            for (Map.Entry<String, Integer> api : policy.apis.entrySet())
+                addAPIMapping(api.getKey(), policy);
         }
 
         for (APIMapping mapping : apiMappings) {
@@ -308,15 +311,19 @@ public class APIMapper {
         headers.add("TF*IDF");
         csv.addRow(headers);
         for (APIMapping mapping : apiMappings) {
+            System.err.println("api: " + mapping.api);
             for (Map.Entry<String, Integer> phrase : mapping.phrases.entrySet()) {
+                System.err.println("phrase: " + phrase.getKey());
                 ArrayList<String> row = new ArrayList<>();
                 row.add(mapping.api);
                 row.add(APIMapping.getSuSiCategory(mapping.api));
                 row.add(phrase.getKey());
                 row.add("" + phrase.getValue());
-                row.add("" + mapping.phraseTF(phrase.getKey()));
-                row.add("" + phraseIDF(phrase.getKey()));
-                row.add("" + (mapping.phraseTF(phrase.getKey()) * phraseIDF(phrase.getKey())));
+                double tf = mapping.phraseTF(phrase.getKey());
+                row.add("" + tf);
+                double idf = phraseIDF(phrase.getKey());
+                row.add("" + idf);
+                row.add("" + idf * tf);
                 csv.addRow(row);
             }
         }
@@ -335,14 +342,18 @@ public class APIMapper {
         headers.add("TF*IDF");
         csv.addRow(headers);
         for (Phrase phrase : phrases) {
+            System.err.println("phrase: " + phrase.name);
             for (Map.Entry<String, Integer> api : phrase.apis.entrySet()) {
+                System.err.println("api: " + api.getKey());
                 ArrayList<String> row = new ArrayList<>();
                 row.add(phrase.name);
                 row.add(api.getKey());
                 row.add("" + api.getValue());
-                row.add("" + phrase.apiTF(api.getKey()));
-                row.add("" + apiIDF(api.getKey()));
-                row.add("" + (phrase.apiTF(api.getKey()) * apiIDF(api.getKey())));
+                double tf = phrase.apiTF(api.getKey());
+                row.add("" + tf);
+                double idf = apiIDF(api.getKey());
+                row.add("" + idf);
+                row.add("" + tf * idf);
                 csv.addRow(row);
             }
         }

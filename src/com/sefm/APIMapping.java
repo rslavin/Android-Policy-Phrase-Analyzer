@@ -15,7 +15,6 @@ public class APIMapping {
     public String api;
     public List<Policy> policies;
     public Map<String, Integer> phrases; // unique list of phrases
-    public String category;
 
     public APIMapping(String api, Policy policy) {
         policies = new ArrayList();
@@ -54,6 +53,21 @@ public class APIMapping {
         while (m.find())
             return m.group(1);
         return api;
+    }
+
+    public static int getApiFreqFromFlowDroid(String api) {
+        Pattern pattern = Pattern.compile("==>(\\d+)");
+        Matcher m = pattern.matcher(api);
+        int count = 1;
+        if (m.find()) {
+            try {
+                count = Integer.parseInt(m.group(1));
+            } catch (NumberFormatException e) {
+                count = 0;
+            }
+        }
+        return count;
+        // TODO instead of returning 0, this should throw an exception
     }
 
     /**
