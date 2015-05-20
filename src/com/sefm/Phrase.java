@@ -11,10 +11,12 @@ public class Phrase {
     public String name;
     public int occurrences;
     private APIMapper apiMapper;
+    private int totalApis;
 
     public Phrase(String name, APIMapper apiMapper) {
         this.apiMapper = apiMapper;
         this.name = name;
+        this.totalApis = 0;
         apis = new HashMap<>();
         policies = new HashSet<>();
     }
@@ -26,6 +28,7 @@ public class Phrase {
             } else {
                 apis.put(newApi.getKey(), newApi.getValue());
             }
+            totalApis += newApi.getValue();
         }
     }
 
@@ -136,6 +139,11 @@ public class Phrase {
             for (int i = 0; i < api.getValue(); i++)
                 keys.add(api.getKey());
         return keys;
+    }
+
+    public double getApiProb(String api) {
+        int apiOcc = apis.get(api);
+        return ((double) apiOcc) / ((double) totalApis);
     }
 
     /**

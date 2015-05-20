@@ -19,8 +19,11 @@ public class APIMapper {
     public List<APIMapping> apiMappings;
     public List<Policy> noPhrasePolicies;
     public List<Policy> noApiPolicies;
+    public Map<String, Integer> totalApiOccurrences;
+    public int totalApiCalls;
+    public Map<String, Integer> totalPhraseOccurrences;
+    public int totalPhrases;
     public boolean verbose;
-    public int countNoAPIs = 0;
     public ArrayList<ArrayList<String>> synonyms;
     public boolean sortByFrequency = false;
 
@@ -31,6 +34,10 @@ public class APIMapper {
         apiMappings = new ArrayList<>();
         noPhrasePolicies = new ArrayList<>();
         noApiPolicies = new ArrayList<>();
+        totalApiOccurrences = new HashMap<>();
+        totalPhraseOccurrences = new HashMap<>();
+        totalApiCalls = 0;
+        totalPhrases = 0;
         // Look through each policy and find matching phrases
         File policyDirectory = new File(policyDirectoryPath);
         for (File fileEntry : policyDirectory.listFiles()) {
@@ -183,6 +190,7 @@ public class APIMapper {
 
     /**
      * Associates APIs to a policy by reading in FlowDroid data from existing files.
+     * Also adds the total occurrences of the api to totalApiOccurrences.
      *
      * @param policy
      * @param apiLogDirectoryPath
@@ -193,10 +201,18 @@ public class APIMapper {
         File apiLog = new File(apiLogDirectoryPath + "/" + policy.name.replaceAll("\\.html$", ".apk.log"));
         BufferedReader br = new BufferedReader(new FileReader(apiLog));
         String line;
-//        ArrayList<String> apis = new ArrayList<>();
         HashMap<String, Integer> apis = new HashMap<>();
         while ((line = br.readLine()) != null) {
-            apis.put(APIMapping.getApiFromFlowDroid(line), APIMapping.getApiFreqFromFlowDroid(line));
+            String api = APIMapping.getApiFromFlowDroid(line);
+            int apiOccurrence = APIMapping.getApiFreqFromFlowDroid(line);
+            apis.put(api, apiOccurrence);
+            // add the api count
+            if (totalApiOccurrences.containsKey(api))
+                totalApiOccurrences.put(api, totalApiOccurrences.get(api) + apiOccurrence);
+            else
+                totalApiOccurrences.put(api, apiOccurrence);
+            totalApiCalls += apiOccurrence;
+
         }
         return apis;
     }
@@ -220,11 +236,18 @@ public class APIMapper {
      * @param newPhrase
      */
     private void phraseAdder(Phrase newPhrase) {
+        // update global occurrence of the phrase
+        if (totalPhraseOccurrences.containsKey(newPhrase.name))
+            totalPhraseOccurrences.put(newPhrase.name, totalPhraseOccurrences.get(newPhrase.name) + newPhrase.occurrences);
+        else
+            totalPhraseOccurrences.put(newPhrase.name, newPhrase.occurrences);
+
         // merge a Phrase if it already exists
         for (Phrase phrase : phrases) {
             if (phrase.name.equals(newPhrase.name)) {
                 // add occurrences
                 phrase.occurrences = phrase.occurrences + newPhrase.occurrences;
+                totalPhrases += phrase.occurrences;
                 phrase.policies.addAll(newPhrase.policies);
                 phrase.addAPIs(newPhrase.apis);
                 return;
@@ -340,6 +363,7 @@ public class APIMapper {
         headers.add("TF");
         headers.add("IDF");
         headers.add("TF*IDF");
+        headers.add("p(api/phrase)");
         csv.addRow(headers);
         for (Phrase phrase : phrases) {
             System.err.println("phrase: " + phrase.name);
@@ -354,9 +378,42 @@ public class APIMapper {
                 double idf = apiIDF(api.getKey());
                 row.add("" + idf);
                 row.add("" + tf * idf);
+                row.add("" + bayesApiPerPhrase(api.getKey(), phrase));
                 csv.addRow(row);
             }
         }
         csv.writeFile();
+    }
+
+    public double bayesApiPerPhrase(String api, Phrase phrase) {
+        double probApi = probApi(api);
+        double probPhrase = probPhrase(phrase.name);
+        double probApiPhrase = phrase.getApiProb(api);
+
+
+        return (probApiPhrase * probPhrase) / probApi;
+    }
+
+    /**
+     * Calculates the probability of an api being called over all api calls for all policies.
+     *
+     * @param api
+     * @return
+     */
+    private double probApi(String api) {
+        double apiOcc = (double) totalApiOccurrences.get(api);
+        return apiOcc / (double) totalApiCalls;
+
+    }
+
+    /**
+     * Calculates the probability of a phrase occurring over all phrases that occurred in policies.
+     *
+     * @param phrase
+     * @return
+     */
+    private double probPhrase(String phrase) {
+        double phraseOcc = (double) totalPhraseOccurrences.get(phrase);
+        return phraseOcc / (double) totalPhrases;
     }
 }
