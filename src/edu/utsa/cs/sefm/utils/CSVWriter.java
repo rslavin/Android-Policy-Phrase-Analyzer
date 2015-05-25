@@ -40,5 +40,17 @@ public class CSVWriter {
         rows.add(newRow + NEWLINE);
     }
 
+    public void addRow(String[] row) {
+        String newRow = "";
+        for (String cell : row) {
+            cell = "\"" + cell.replaceAll("\"", "'") + "\"";
+            if (newRow.length() < 1)
+                newRow = cell;
+            else
+                newRow += DELIMITER + cell;
+        }
+        rows.add(newRow + NEWLINE);
+    }
+
 
 }
