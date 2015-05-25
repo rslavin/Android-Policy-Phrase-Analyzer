@@ -1,4 +1,4 @@
-package com.sefm;
+package edu.utsa.cs.sefm.utils;
 
 import java.io.FileWriter;
 import java.io.IOException;
