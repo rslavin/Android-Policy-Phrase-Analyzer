@@ -1,10 +1,12 @@
 package edu.utsa.cs.sefm;
 
 import edu.utsa.cs.sefm.mapping.APIMapper;
+import edu.utsa.cs.sefm.utils.HTMLParser;
+import edu.utsa.cs.sefm.utils.Text;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.nio.file.Files;
+import java.util.*;
 
 public class Driver {
 
@@ -13,21 +15,62 @@ public class Driver {
     private static String policyFiles = "C:\\Users\\Rocky\\Dropbox\\Research\\android privacy\\analysis\\1000policies";
     private static String phraseFile = "phrases.txt";
     private static String synonymFile = "synonyms.txt";
+    private static String associatorFile = "associators.txt";
     private static String outFile = "out.txt";
 
     public static void main(String args[]) {
-        ArrayList<String> phrases;
+        List<String> phrases;
+        List<String> associators; // for example, such as, etc
+        try {
+            phrases = Text.getWordList(phraseFile);
+            associators = Text.getWordList(associatorFile);
+        } catch (IOException e) {
+            System.err.println("File not found");
+            e.printStackTrace();
+            return;
+        }
+
+//        doMappings(phrases);
+        try {
+            doAssociations(phrases, associators);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static void doAssociations(List<String> phrases, List<String> associators) throws IOException {
+        List<String> associated = new ArrayList<>();
+        File policyDirectory = new File(policyFiles);
+        for (File fileEntry : policyDirectory.listFiles()) {
+            String fileContents = new String(Files.readAllBytes(fileEntry.toPath()));
+            HTMLParser html = new HTMLParser(fileContents);
+            fileContents = html.removeHTMLTags();
+            Text text = new Text(fileContents, associators);
+
+            // for each line, check if it contains a phrase from the list
+            for (String phrase : phrases) {
+                List<String> found = text.findAssociated(phrase);
+                associated.addAll(found);
+            }
+
+        }
+
+        // remove duplicates
+        Set set = new TreeSet(String.CASE_INSENSITIVE_ORDER);
+        set.addAll(associated);
+        associated = new ArrayList(set);
+
+        for (String sentence : associated)
+            System.out.println(sentence);
+
+    }
+
+    private static void doMappings(List<String> phrases) {
         try {
             System.setOut(new PrintStream(new File(outFile)));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        }
-
-        try {
-            phrases = getPhrases(phraseFile);
-        } catch (IOException e) {
-            System.err.println("Phrase file not found");
-            return;
         }
 
         try {
@@ -41,7 +84,6 @@ public class Driver {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     /**
@@ -68,19 +110,6 @@ public class Driver {
         return synonymList;
     }
 
-    private static ArrayList<String> getPhrases(String filePath) throws IOException {
-        File file = new File(filePath);
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        String line;
-        ArrayList<String> phrases = new ArrayList<String>();
-        while ((line = br.readLine()) != null)
-            phrases.addAll(Arrays.asList(line.replace("\n", "").replace("\r", "").toLowerCase().split(",")));
 
-        br.close();
-        while (phrases.remove(" ")) ;
-        for (int i = 0; i < phrases.size(); i++)
-            phrases.set(i, phrases.get(i).trim());
-        return phrases;
-    }
 
 }

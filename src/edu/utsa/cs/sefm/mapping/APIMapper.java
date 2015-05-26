@@ -31,7 +31,7 @@ public class APIMapper {
     public ArrayList<ArrayList<String>> synonyms;
     public boolean sortByFrequency = false;
 
-    public APIMapper(ArrayList<String> phrases, String policyDirectoryPath, String apiLogDirectoryPath, boolean verbose, ArrayList<ArrayList<String>> synonyms) throws IOException {
+    public APIMapper(List<String> phrases, String policyDirectoryPath, String apiLogDirectoryPath, boolean verbose, ArrayList<ArrayList<String>> synonyms) throws IOException {
         this.verbose = verbose;
         this.synonyms = synonyms;
         policies = new ArrayList<>();

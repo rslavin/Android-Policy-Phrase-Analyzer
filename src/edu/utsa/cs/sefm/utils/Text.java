@@ -23,13 +23,13 @@ public class Text {
     }
 
     /**
-     * Parses "associators" from file. Accepts comma and newline delimited lists.
+     * Reads a word file into a List.
      *
-     * @param filepath
+     * @param filepath Newline or comma delimited list of words.
      * @return
      * @throws FileNotFoundException
      */
-    public static List<String> parseAssociators(String filepath) throws FileNotFoundException {
+    public static List<String> getWordList(String filepath) throws FileNotFoundException {
         File file = new File(filepath);
         BufferedReader br = new BufferedReader(new FileReader(file));
         String line;
@@ -62,7 +62,7 @@ public class Text {
 
         Matcher matcher;
         for (String associator : associators) {
-            matcher = Pattern.compile("([^.]*" + phrase + ".*" + associator + "[^.]*)").matcher(this.text);
+            matcher = Pattern.compile("([^.]*" + phrase + "[^.]*" + associator + "[^.]*)").matcher(this.text);
             while (matcher.find())
                 found.add(matcher.group());
         }
