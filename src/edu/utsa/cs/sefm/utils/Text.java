@@ -69,4 +69,19 @@ public class Text {
 
         return found;
     }
+
+    public void markAssociators(String color) {
+        for (String associator : associators) {
+            text = text.replaceAll(associator, "<font color=\"" + color + "\">" + associator + "</font>");
+        }
+    }
+
+    public void markWord(String word, String color) {
+        text = text.replaceAll(word, "<font color=\"" + color + "\">" + word + "</font>");
+    }
+
+    public String toHTML() {
+        String ret = text.replaceAll("\n\n", "</li>\n<li>");
+        return "<html><body>\n<ol>\n<li>\n" + ret.substring(0, ret.length() - 5) + "\n</ol></body></html>";
+    }
 }

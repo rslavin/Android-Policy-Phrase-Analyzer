@@ -32,11 +32,23 @@ public class Driver {
 
 //        doMappings(phrases);
         try {
-            doAssociations(phrases, associators);
-        } catch (IOException e) {
+            //doAssociations(phrases, associators);
+            System.setOut(new PrintStream(new File("out.html")));
+            convertAssociatorOutputToHTML(phrases, associators, "C:\\Users\\Rocky\\Dropbox\\Research\\android privacy\\analysis\\associators_output.txt");
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
+
+    }
+
+    private static void convertAssociatorOutputToHTML(List<String> phrases, List<String> associators, String file) throws IOException {
+        String fileContents = new String(Files.readAllBytes(new File(file).toPath()));
+        Text fileText = new Text(fileContents, associators);
+        fileText.markAssociators("blue");
+        for (String phrase : phrases)
+            fileText.markWord(phrase, "green");
+        System.out.println(fileText.toHTML());
     }
 
     private static void doAssociations(List<String> phrases, List<String> associators) throws IOException {
