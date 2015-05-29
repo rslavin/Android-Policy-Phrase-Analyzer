@@ -30,14 +30,14 @@ public class Driver {
             return;
         }
 
-//        doMappings(phrases);
-        try {
+        doMappings(phrases);
+/*        try {
             //doAssociations(phrases, associators);
             System.setOut(new PrintStream(new File("out.html")));
             convertAssociatorOutputToHTML(phrases, associators, "C:\\Users\\Rocky\\Dropbox\\Research\\android privacy\\analysis\\associators_output.txt");
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
 
 
     }
@@ -51,6 +51,14 @@ public class Driver {
         System.out.println(fileText.toHTML());
     }
 
+    /**
+     * Extracts sentences from policies where a phrase appears followed by an associator (e.g.,
+     * for example, such as, etc).
+     *
+     * @param phrases
+     * @param associators
+     * @throws IOException
+     */
     private static void doAssociations(List<String> phrases, List<String> associators) throws IOException {
         List<String> associated = new ArrayList<>();
         File policyDirectory = new File(policyFiles);
@@ -78,6 +86,10 @@ public class Driver {
 
     }
 
+    /**
+     * Maps APIs to phrases and phrases to APIs. Outputs data in csv files.
+     * @param phrases
+     */
     private static void doMappings(List<String> phrases) {
         try {
             System.setOut(new PrintStream(new File(outFile)));
