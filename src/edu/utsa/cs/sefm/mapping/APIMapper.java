@@ -9,10 +9,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Rocky on 5/12/2015.
@@ -30,6 +27,7 @@ public class APIMapper {
     public boolean verbose;
     public ArrayList<ArrayList<String>> synonyms;
     public boolean sortByFrequency = false;
+    public Map<String, Set<String>> googleMatches;
 
     public APIMapper(List<String> phrases, String policyDirectoryPath, String apiLogDirectoryPath, boolean verbose, ArrayList<ArrayList<String>> synonyms) throws IOException {
         this.verbose = verbose;
@@ -368,7 +366,8 @@ public class APIMapper {
         headers.add("IDF");
         headers.add("TF*IDF");
         headers.add("p(api/phrase)");
-        headers.add("Google Result");
+        if (googleMatches != null)
+            headers.add("Google Result");
         csv.addRow(headers);
         for (Phrase phrase : phrases) {
             System.err.println("phrase: " + phrase.name);
@@ -384,7 +383,8 @@ public class APIMapper {
                 row.add("" + idf);
                 row.add("" + tf * idf);
                 row.add("" + bayesApiPerPhrase(api.getKey(), phrase));
-                row.add(googleFilter(phrase.name, api.getKey()) ? "1" : "0");
+                if (googleMatches != null)
+                    row.add(googleFilter(phrase.name, api.getKey()) ? "1" : "0");
                 csv.addRow(row);
             }
         }
@@ -400,8 +400,44 @@ public class APIMapper {
      * @return True if Google results show relationship between the phrase and api, false otherwise.
      */
     private boolean googleFilter(String phrase, String api) {
-
+        Set<String> classes;
+        if ((classes = googleMatches.get(phrase)) != null) {
+            for (String className : classes) {
+                if (api.contains(className))
+                    return true;
+            }
+        }
         return false;
+    }
+
+    /**
+     * Reads in the csv output from the document downloader containing Google results of API classes
+     * for each phrase.
+     *
+     * @param filename
+     */
+    public void readClassDoc(String filename) {
+        this.googleMatches = new HashMap<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            String line;
+            // read each line
+            while ((line = br.readLine()) != null) {
+                String cells[] = line.split(",");
+                String className = cells[0].replace("\"", "");
+                String api = cells[1].replace("\"", "");
+                // if the map already has the classname, add the api to it
+                if (googleMatches.containsKey(className))
+                    googleMatches.get(className).add(api);
+                else { // otherwise, create a new entry for the classname
+                    Set<String> apis = new HashSet<>();
+                    apis.add(api);
+                    googleMatches.put(className, apis);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading file: " + filename);
+            e.printStackTrace();
+        }
     }
 
     public double bayesApiPerPhrase(String api, Phrase phrase) {

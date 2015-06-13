@@ -16,6 +16,7 @@ public class Driver {
     private static String phraseFile = "phrases.txt";
     private static String synonymFile = "synonyms.txt";
     private static String associatorFile = "associators.txt";
+    private static String googleDocFile = "googleDocs.csv";
     private static String outFile = "out.txt";
 
     public static void main(String args[]) {
@@ -30,7 +31,7 @@ public class Driver {
             return;
         }
 
-        doMappings(phrases);
+        doMappings(phrases, googleDocFile);
 /*        try {
             //doAssociations(phrases, associators);
             System.setOut(new PrintStream(new File("out.html")));
@@ -90,7 +91,7 @@ public class Driver {
      * Maps APIs to phrases and phrases to APIs. Outputs data in csv files.
      * @param phrases
      */
-    private static void doMappings(List<String> phrases) {
+    private static void doMappings(List<String> phrases, String googleDocFile) {
         try {
             System.setOut(new PrintStream(new File(outFile)));
         } catch (FileNotFoundException e) {
@@ -99,6 +100,8 @@ public class Driver {
 
         try {
             APIMapper mapper = new APIMapper(phrases, policyFiles, apiLogs, VERBOSE, parseSynonyms());
+            if (googleDocFile != null)
+                mapper.readClassDoc(googleDocFile);
             mapper.apiPhraseFrequency(VERBOSE);
             mapper.apiMap();
             mapper.apiMappingsToCSV("phraseToApis");
