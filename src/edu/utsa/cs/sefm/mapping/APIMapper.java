@@ -368,6 +368,7 @@ public class APIMapper {
         headers.add("IDF");
         headers.add("TF*IDF");
         headers.add("p(api/phrase)");
+        headers.add("Google Result");
         csv.addRow(headers);
         for (Phrase phrase : phrases) {
             System.err.println("phrase: " + phrase.name);
@@ -383,10 +384,24 @@ public class APIMapper {
                 row.add("" + idf);
                 row.add("" + tf * idf);
                 row.add("" + bayesApiPerPhrase(api.getKey(), phrase));
+                row.add(googleFilter(phrase.name, api.getKey()) ? "1" : "0");
                 csv.addRow(row);
             }
         }
         csv.writeFile();
+    }
+
+    /**
+     * Checks if a phrase is related to an API based on Google results. Based on input from
+     * Documentation Downloader.
+     *
+     * @param phrase
+     * @param api
+     * @return True if Google results show relationship between the phrase and api, false otherwise.
+     */
+    private boolean googleFilter(String phrase, String api) {
+
+        return false;
     }
 
     public double bayesApiPerPhrase(String api, Phrase phrase) {
