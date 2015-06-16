@@ -7,17 +7,20 @@ import edu.utsa.cs.sefm.utils.Text;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.Semaphore;
 
 public class Driver {
 
     private static final boolean VERBOSE = false;
     private static String apiLogs = "C:\\Users\\Rocky\\Dropbox\\Research\\android privacy\\analysis\\1000policiesAPIS";
-    private static String policyFiles = "C:\\Users\\Rocky\\Dropbox\\Research\\android privacy\\analysis\\1000policies";
+    private static String policyFiles = "C:\\Users\\James\\Dropbox\\android privacy\\analysis\\1000policies";
     private static String phraseFile = "phrases.txt";
     private static String synonymFile = "synonyms.txt";
     private static String associatorFile = "associators.txt";
     private static String googleDocFile = "googleDocs.csv";
     private static String outFile = "out.txt";
+
+    private static Semaphore workerThreadCtr = new Semaphore(Runtime.getRuntime().availableProcessors(), false);
 
     public static void main(String args[]) {
         List<String> phrases;
@@ -32,10 +35,10 @@ public class Driver {
         }
 
         doMappings(phrases, googleDocFile);
-/*        try {
-            //doAssociations(phrases, associators);
-            System.setOut(new PrintStream(new File("out.html")));
-            convertAssociatorOutputToHTML(phrases, associators, "C:\\Users\\Rocky\\Dropbox\\Research\\android privacy\\analysis\\associators_output.txt");
+  /*      try {
+            doAssociations(phrases, associators);
+            //System.setOut(new PrintStream(new File("out.html")));
+            //convertAssociatorOutputToHTML(phrases, associators, "C:\\Users\\Rocky\\Dropbox\\Research\\android privacy\\analysis\\associators_output.txt");
         } catch (Exception e) {
             e.printStackTrace();
         }*/
@@ -55,15 +58,93 @@ public class Driver {
     /**
      * Extracts sentences from policies where a phrase appears followed by an associator (e.g.,
      * for example, such as, etc).
+     * Each policy is parsed in its own thread.
      *
      * @param phrases
      * @param associators
-     * @throws IOException
+     * @throws InterruptedException 
      */
-    private static void doAssociations(List<String> phrases, List<String> associators) throws IOException {
+    private static void doAssociations(List<String> phrases, List<String> associators) 
+    		throws InterruptedException {
+    	doAssociations(System.out, phrases, associators);
+    }
+    
+	private static void doAssociations(PrintStream output, List<String> phrases, List<String> associators) 
+			throws InterruptedException {
         List<String> associated = new ArrayList<>();
-        File policyDirectory = new File(policyFiles);
-        for (File fileEntry : policyDirectory.listFiles()) {
+        File[] policies = new File(policyFiles).listFiles();
+        int numFiles = policies.length;
+        AssociationWorker[] threadPool = new AssociationWorker[numFiles];
+        
+        for (int i = 0; i < numFiles; i++) {
+        	threadPool[i] = new Driver().new AssociationWorker(
+        			policies[i], associators, phrases);
+        	threadPool[i].start();
+        }
+        for (int i = 0; i < numFiles; i++) {
+        	threadPool[i].join();
+        	System.err.println("Joined thread " + (i + 1) + "/" + numFiles);
+        }
+        for (int i = 0; i < numFiles; i++) {
+        	associated.addAll(threadPool[i].getResults());
+        }
+        // remove duplicates
+		Set<String> set = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        set.addAll(associated);
+        associated = new ArrayList<>(set);
+
+        for (String sentence : associated)
+            output.println(sentence);
+
+    }
+    
+	/**
+	 * A Thread which extracts sentences of interest (as described in doAssociations())
+	 * from a single policy file.
+	 * After running the thread, call getResults() for the ArrayList of results.
+	 */
+    class AssociationWorker extends Thread {
+
+    	private File fileEntry;
+    	private List<String> associators, phrases;
+    	private ArrayList<String> results = new ArrayList<>();
+    	
+    	/**
+    	 * 
+    	 * @param fileEntry the policy file
+    	 * @param associators a list of associator phrases ("like", "such as", etc.)
+    	 * @param phrases a list of phrases associated with data being collected ("information", "udid", etc.)
+    	 */
+    	public AssociationWorker(File fileEntry, List<String> associators, List<String> phrases) {
+    		super();
+    		this.fileEntry = fileEntry;
+    		this.associators = associators;
+    		this.phrases = phrases;
+    	}
+    	
+    	/**
+    	 * Called when the thread starts: safely acquire/release the semaphore
+    	 * and start working.
+    	 */
+		@Override
+		public void run() {
+			try {
+				workerThreadCtr.acquire();
+				work();
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+			finally {
+				workerThreadCtr.release();
+			}
+		}
+    	
+		/**
+		 * Extracts the sentences; unchanged from original unthreaded version.
+		 * @throws IOException if error reading policy file
+		 */
+		public void work() throws IOException {
             String fileContents = new String(Files.readAllBytes(fileEntry.toPath()));
             HTMLParser html = new HTMLParser(fileContents);
             fileContents = html.removeHTMLTags();
@@ -72,20 +153,16 @@ public class Driver {
             // for each line, check if it contains a phrase from the list
             for (String phrase : phrases) {
                 List<String> found = text.findAssociated(phrase);
-                associated.addAll(found);
+                results.addAll(found);
             }
-
-        }
-
-        // remove duplicates
-        Set set = new TreeSet(String.CASE_INSENSITIVE_ORDER);
-        set.addAll(associated);
-        associated = new ArrayList(set);
-
-        for (String sentence : associated)
-            System.out.println(sentence);
-
+		}
+		
+		public ArrayList<String> getResults() {
+			return results;
+		}
+    	
     }
+
 
     /**
      * Maps APIs to phrases and phrases to APIs. Outputs data in csv files.

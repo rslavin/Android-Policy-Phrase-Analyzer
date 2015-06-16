@@ -40,8 +40,12 @@ public class HTMLParser {
      * @return Plaintext version of html
      */
     public String removeHTMLTags() {
+    	return Jsoup.parse(html).text();	//WJH: apparently this strips everything
+    										//and fixes weird formatting errors
+    	/*
         Document doc = Jsoup.parse(html);
         doc.select("script").remove();
         return Jsoup.clean(doc.body().html(), Whitelist.none());
+        */
     }
 }
